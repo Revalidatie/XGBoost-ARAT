@@ -1,4 +1,4 @@
-# BoostMe Research Repository
+# XGBoost-ARAT Research Repository
 We developed an XGBoost  model that predicts patient-specific upper-extremity capacity at 6 months as measured with the ARAT. Serial measurements of up to 5 months of ARAT score, finger extension, shoulder abduction, and their time of measurement were included as predictors.  Best fit was found using grid search with stratified 5-fold, 5-repeat cross-validation. We estimated prediction intervals by resampling with replacement 300 bootstrap datasets from the train set, training our model on each bootstrap sample, and calculating the prediction errors on the left-out samples. The variance in the standard errors over the bootstrapped samples provides an estimate of the prediction uncertainty. As a final prediction, we took the median of the bootstrapped predictions.
 
 The performance of the bagged ensemble of XGBoost models is compared with a mixed model introduced by [Selles et al., 2021](https://jnnp.bmj.com/content/92/6/574). 
@@ -15,9 +15,13 @@ Inputs, outputs and purpose off all functions are described in their docstrings.
 ### Visuals
 <em>Work in progress</em>
 
-### Roadmap
-* Develop a shiny app for individualized stroke recovery prediction similar to [Selles et al.](https://emcbiostatistics.shinyapps.io/DynamicPredictionARATapp/)
-* Release production version of this repo
+### To do
+* Clean-up repo: delete obsolete files and add/update docstrings where necessary  
+* Update ReadMe with visuals, proper function descriptions, reference to shiny
+* Add licensing information an acknowledgements
+* Make repo public
+* Add link to scientific publication
+
 
 ### Authors and acknowledgment
 By G.J. van der Gun <br>
