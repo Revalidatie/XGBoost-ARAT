@@ -1,6 +1,6 @@
-# Boostme Shiny App
+# XGBoost-ARAT Shiny App
 
-We developed an XGBoost model that predicts patient-specific upper-extremity capacity at 6 months as measured with the ARAT. Measurements of up to 5 months of ARAT score, finger extension, shoulder abduction, and their time of measurement were included as predictors. Please refer to the [Boostme main branch](https://gitlab.com/radiology/igit/icai-stroke-lab/boostme)
+We developed an XGBoost model that predicts patient-specific upper-extremity capacity at 6 months as measured with the ARAT. Measurements of up to 5 months of ARAT score, finger extension, shoulder abduction, and their time of measurement were included as predictors. Please refer to the [XGBoost-ARAT main branch](https://github.com/GJvdG/XGBoost-ARAT/tree/main)
 
 This branch contains the Shiny application showcasing the XGBoost ARAT prediction model. The actual model is not included in this repository. Instead, model predictions for all possible combinations of predictor values are stored in App/R/XGBlookup.Rdata.
 
