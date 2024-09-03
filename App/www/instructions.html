@@ -1,0 +1,70 @@
+<style>
+  table {
+              border-collapse: separate;
+              border-spacing: 10px;
+              width: 100%; 
+          }
+          th, td {
+              padding: 2px;
+              text-align: left;
+              vertical-align: top;
+          }
+</style>
+
+<div style="width: 100%; text-align: left; padding: 5px 0;">
+
+  <h3>Welcome to the XGBoost ARAT prediction tool</h3>
+  Welcome to web application developed to showcase an XGBoost prediction model of upper limb recovery of stroke patients. The app makes a prediction of the ARAT score at 6 months of an individual patient based on clinical data that you input.
+  
+  <br /><br /><em>This tool is currently a research tool and not yet suitable for clinical use.</em>
+  
+  <h4>Steps to get a prediction</h4>
+  <ol>
+    <li><b>Upload patient data</b></li>
+    Predictions can be retrieved by uploading a file with comma-separated patient data in the panel on the left. This file should contain one or multiple measurements of ARAT, shoulder abduction, finger extension and the corresponding time of measurement of a single patient. A detailed description of the input variables is given below. You can download example patient files in the left panel.
+    <li><b>Choose moment of model application</b></li>
+    After uploading is complete, a slider will appear that lets you select the moment in time from which you want to make the predictions. For example, if you choose 7 days post stroke, the model will predict as if it was applied at that time, with only the measurements that were taken in the first week. 
+    <li><b>View prediction</b></li>
+    Predictions for your patient can be viewed in the tab <i>View prediction</i>. The prediction output will dynamically change when you select different time points with the slider.
+  </ol>
+  
+  <h4>Description of input data</h4>
+  <table>
+        <tr>
+            <th>Variable</th>
+            <th>Description</th>
+            <th>Range</th>
+        </tr>
+        <tr>
+            <td>ARAT</td>
+            <td>Action Research Arm Test</td>
+            <td>[0-57]</td>
+        </tr>
+        <tr>
+            <td>SA</td>
+            <td>Fugl-Meyer Shoulder Abduction</td>
+            <td>0: no random movement
+              <br />9: random activity palpable, no movement visible
+              <br />14: random movement seeable but not seeable in total movement range
+              <br />19: random movement across total movement range, not possible against resistance
+              <br />25: random movement against resistance, but weaker than contralateral side
+              <br />33: normal strength in comparison with contralateral side 
+            </td>
+        </tr>
+        <tr>
+            <td>FE</td>
+            <td>Fugl-Meyer Finger Extension</td>
+            <td>none
+              <br />partial
+              <br />full
+            </td>
+        </tr>
+        <tr>
+            <td>Days</td>
+            <td>Time of measurement in days since stroke</td>
+            <td>[0-194]</td>
+        </tr>
+    </table>
+    <font color = 'red'> Make sure your data format corresponds to the examples provided, and that there are no missing values. </font>
+</div>
+
