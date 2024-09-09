@@ -11,6 +11,16 @@ baseline_ARAT <- test_xgb %>%
   select(Number, ARAT) %>% 
   rename(bARAT = ARAT)
 
+xgb_grd <- expand.grid(
+  nrounds = 1000, # number of boosting rounds
+  max_depth = 4, # max tree depth
+  eta = 0.015, # learning rate
+  gamma = 0, # regularization param. (pruning)
+  colsample_bytree = 1, # fraction of features used for each tree
+  min_child_weight = 1, # minimum sum of instance weight (prevent single obs. childs)
+  subsample = 0.75 # fraction of training data used in each round
+)
+
 for(i in 1:length(weeks)){
   # define moment post-stroke [Days] when predictions are made (day at which model is applied)
   wk <- weeks[i]
@@ -27,8 +37,8 @@ for(i in 1:length(weeks)){
   pred_list2 <- predict.XGB(dat_train = train_xgb, # train data to bootstrap on
                            new_dat = eval_xgb2, # new data to provide predictions + intervals for
                            X = colnames(select(train_xgb,-c(Outcome,Number))), # names of predictors
-                           grd = xgb_grd0, # tune grid
-                           nb = 100, # number of bootstraps
+                           grd = xgb_grd, # tune grid
+                           nb = 300, # number of bootstraps
                            alpha = 0.2, # significance level for PIs
                            seed = seed
   )
@@ -41,9 +51,9 @@ for(i in 1:length(weeks)){
   # create groups and select vars of interest
   pred_grps_xgb <- merge(baseline_ARAT, pred_xgb2, by="Number")
   AE <- pred_grps_xgb %>% 
-    mutate(ARAT_base = factor(case_when(bARAT < 10 ~ "L",
-                                        bARAT >= 10 & bARAT < 30 ~ "M",
-                                        bARAT >= 30 ~ "H"),levels = c("L","M","H"))) %>%
+    mutate(ARAT_base = factor(case_when(bARAT <= 22 ~ "L",
+                                        bARAT > 22 & bARAT <= 47 ~ "M",
+                                        bARAT > 47 ~ "H"),levels = c("L","M","H"))) %>%
     mutate(ARAT_out = factor(case_when(Actual < 20 ~ "L",
                                        Actual >= 20 & Actual < 40 ~ "M",
                                        Actual >= 40 ~ "H"), levels = c("L","M","H"))) %>% 

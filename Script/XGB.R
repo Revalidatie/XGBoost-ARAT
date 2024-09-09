@@ -642,9 +642,9 @@ perf_wks %>%
   theme(legend.position="none")
 
 sample_size5 <- aggregate(AE_xgb ~ ARAT_base + time, perf_wks, length) %>% rename(count = AE_xgb)
-labels <- c(L = "Baseline ARAT [0-10)",
-            M = "Baseline ARAT [10-30)",
-            H = "Baseline ARAT [30-57]")
+labels <- c(L = "Baseline ARAT 0-22",
+            M = "Baseline ARAT 23-47",
+            H = "Baseline ARAT 48-57")
 perf_wks %>%
   left_join(sample_size5, by = c("time", "ARAT_base")) %>%
   mutate(myaxis = factor(paste0(time, "\n", "n=", count),
