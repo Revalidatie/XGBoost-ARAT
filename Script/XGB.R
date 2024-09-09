@@ -656,7 +656,8 @@ perf_wks %>%
   labs(y = "Absolute Error",
        x = "") +
   scale_y_continuous(lim =c(0,60))  +
-  scale_fill_viridis(discrete = T) +
+  scale_fill_manual(values = c("#31688E","#35B779","#FDE725")) +
+  #scale_fill_viridis(discrete = T) +
   fancy +
   theme(legend.position="none")
 
