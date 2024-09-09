@@ -504,7 +504,7 @@ plot <- ggplot(dat, aes(x = Days, y = ARAT, group = Number)) +
   fancy
 
 # patients to highlight
-highlight_patients <- c(32, 88, 337, 136, 247)
+highlight_patients <- c(32, 42, 88, 337, 136)
 
 # highlight patients
 for (id in highlight_patients) {
