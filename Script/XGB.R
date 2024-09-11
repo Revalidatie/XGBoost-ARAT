@@ -88,6 +88,11 @@ catvars <- names(labels) # all categorical variables
 catvars <- catvars[catvars %in% allvars] # cat vars in current feature set
 numvars <- setdiff(allvars, catvars) # only numerical variables
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 0f389f2d40d04271ab6ffeb64239c4168db78d88
 # ------------------------------------------------------
 # Inclusion criteria
 # ------------------------------------------------------
