@@ -88,8 +88,6 @@ catvars <- names(labels) # all categorical variables
 catvars <- catvars[catvars %in% allvars] # cat vars in current feature set
 numvars <- setdiff(allvars, catvars) # only numerical variables
 
-
-
 # ------------------------------------------------------
 # Inclusion criteria
 # ------------------------------------------------------
@@ -510,6 +508,7 @@ plot <- ggplot(dat, aes(x = Days, y = ARAT, group = Number)) +
 
 # patients to highlight
 highlight_patients <- c(32, 42, 88, 337, 136)
+highlight_patients <- c(3,5,14,23,35,41,42,85,97,101,123,125,154,169,170,180,196,199,235,247) # typical middle group patients
 
 # highlight patients
 for (id in highlight_patients) {
@@ -583,8 +582,8 @@ ggplot(perflong, aes(x = name, y = value)) +
 
 # per week performance
 # note: run XGB_perf_over_time auxiliary script to get perf_wks
-sample_size1 <- perf_wks %>% group_by(time) %>% summarise(count=n())
-perf_wks %>%
+sample_size1 <- perf_wks_xgb %>% group_by(time) %>% summarise(count=n())
+perf_wks_xgb %>%
   left_join(sample_size1, by = "time") %>%
   mutate(myaxis = factor(paste0(time, "\n", "n=", count),
                          levels = unique(paste0(time, "\n", "n=", count)))) %>%
@@ -598,7 +597,7 @@ perf_wks %>%
   theme(legend.position="none")
 
 # per group performance
-plot_week <- subset(perf_wks, time == "Week 1") 
+plot_week <- subset(perf_wks_xgb, time == "Week 1") 
 sample_size2 <- plot_week %>% group_by(ARAT_base) %>% summarise(count=n())
 labels <- c(L = paste("Baseline ARAT [0-10) \n n=",  sample_size2$count[sample_size2$ARAT_base == "L"]),
             M = paste("Baseline ARAT [10-30) \n n=", sample_size2$count[sample_size2$ARAT_base == "M"]), 
@@ -627,34 +626,36 @@ ggplot(plot_week, aes(y = AE_xgb)) +
   fancy
 
 # per group & per week performance combined
-sample_size4 <- aggregate(AE_xgb ~ ARAT_out + time, perf_wks, length) %>% rename(count = AE_xgb)
-labels <- c(L = "Outcome ARAT [0-20)",
-            M = "Outcome ARAT [20-40)",
-            H = "Outcome ARAT [30-57]")
-perf_wks %>%
-  left_join(sample_size4, by = c("time", "ARAT_out")) %>%
-  mutate(myaxis = factor(paste0(time, "\n", "n=", count),
-                         levels = unique(paste0(time, "\n", "n=", count)))) %>%
-  ggplot(aes(x = myaxis, y = AE_xgb, fill=time)) +
-  geom_boxplot() +
-  facet_wrap(~ ARAT_out, scales = "free",
-             labeller = labeller(ARAT_out = labels)) +
-  labs(y = "Absolute Error",
-       x = "") +
-  scale_y_continuous(lim =c(0,60))  +
-  scale_fill_viridis(discrete = T) +
-  fancy +
-  theme(legend.position="none")
-
-sample_size5 <- aggregate(AE_xgb ~ ARAT_base + time, perf_wks, length) %>% rename(count = AE_xgb)
+sample_size4 <- aggregate(AE ~ ARAT_base + time, perf_wks_xgb, length) %>% rename(count = AE)
 labels <- c(L = "Baseline ARAT 0-22",
             M = "Baseline ARAT 23-47",
             H = "Baseline ARAT 48-57")
+perf_wks_mm <- perf_wks_mm %>% mutate(mod = "MM")
+perf_wks_xgb <- perf_wks_xgb %>% mutate(mod = "XGB")
+perf_wks <- rbind(perf_wks_mm, perf_wks_xgb)
+
 perf_wks %>%
+  left_join(sample_size4, by = c("time", "ARAT_base")) %>%
+  mutate(myaxis = factor(paste0(time, "\n", "n=", count),
+                         levels = unique(paste0(time, "\n", "n=", count)))) %>%
+  ggplot(aes(x = myaxis, y = AE, fill=mod)) +
+  geom_boxplot() +
+  facet_wrap(~ ARAT_base, scales = "free",
+             labeller = labeller(ARAT_base = labels)) +
+  labs(y = "Absolute Error",
+       x = "",
+       fill = "Model") +
+  scale_y_continuous(lim =c(0,60))  +
+  scale_fill_manual(values = c("#31688E","#35B779"), labels = c("Mixed Model", "XGBoost")) +
+  fancy +
+  theme(legend.position = "bottom")
+
+sample_size5 <- aggregate(AE ~ ARAT_base + time, perf_wks_mm, length) %>% rename(count = AE)
+perf_wks_mm %>%
   left_join(sample_size5, by = c("time", "ARAT_base")) %>%
   mutate(myaxis = factor(paste0(time, "\n", "n=", count),
                          levels = unique(paste0(time, "\n", "n=", count)))) %>%
-  ggplot(aes(x = myaxis, y = AE_xgb, fill=time)) +
+  ggplot(aes(x = myaxis, y = AE, fill=time)) +
   geom_boxplot() +
   facet_wrap(~ ARAT_base, scales = "free",
              labeller = labeller(ARAT_base = labels)) +
@@ -662,7 +663,6 @@ perf_wks %>%
        x = "") +
   scale_y_continuous(lim =c(0,60))  +
   scale_fill_manual(values = c("#31688E","#35B779","#FDE725")) +
-  #scale_fill_viridis(discrete = T) +
   fancy +
   theme(legend.position="none")
 

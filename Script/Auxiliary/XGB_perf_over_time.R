@@ -3,7 +3,7 @@
 weeks <- c(1, 6, 13)
 names <- c("Week 1", "Week 6", "Week 13")
 
-perf_wks <- data.frame()
+perf_wks_xgb <- data.frame()
 baseline_ARAT <- test_xgb %>% 
   group_by(Number) %>% 
   slice_min(Days, n=1) %>% # first obs
@@ -57,13 +57,14 @@ for(i in 1:length(weeks)){
     mutate(ARAT_out = factor(case_when(Actual < 20 ~ "L",
                                        Actual >= 20 & Actual < 40 ~ "M",
                                        Actual >= 40 ~ "H"), levels = c("L","M","H"))) %>% 
-    select(AE_xgb, PIw, ARAT_base, ARAT_out)
+    select(AE_xgb, PIw, ARAT_base, ARAT_out) %>% 
+    rename(AE = AE_xgb)
   
   # calculate performance metric on unseen data
   AE_labeled <- cbind(AE, time = names[i])
-  perf_wks <- rbind(perf_wks, AE_labeled)
+  perf_wks_xgb <- rbind(perf_wks_xgb, AE_labeled)
 }
 
-perf_wks$time <- factor(perf_wks$time, levels = names)
+perf_wks_xgb$time <- factor(perf_wks_xgb$time, levels = names)
 
-#save(perf_wks,file = "Data/perf_over_wks.Rdata")
+#save(perf_wks_xgb,file = "Data/perf_over_wks_xgb.Rdata")
