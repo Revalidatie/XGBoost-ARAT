@@ -49,23 +49,8 @@ dat_raw <- data
 # remove outliers and/or erroneous data
 summary(dat_raw)
 
-# number of measurements per patient
-nm_per_pat <- dat_raw %>%
-  group_by(Number) %>%
-  summarise(nm = n())
-nm_per_pat %>%
-  summarise(across(nm, list(median = median, sd = sd, min = min, max = max), .names = "nm-{fn}"))
-
-# count
-nPatients_drop <- sum(nm_per_pat$nm < 2)
-cat("# Patients with less than 2 obs.:", nPatients_drop, "\n")
-
-# drop patients with less than 2 obs / keep patients with more than 1 obs
-dat <- dat_raw %>%
-  filter(Number %in% nm_per_pat$Number[nm_per_pat$nm > 1])
-
 # replace or drop erroneous data
-dat <- dat %>% 
+dat <- dat_raw %>% 
   mutate(RTPA = replace(RTPA, RTPA > 1, NA)) %>%  # RTPA is binary?
   mutate(Sens = replace(Sens, Sens > 2, NA)) %>%  # NIHS scale 8 is max [2]
   distinct(across(-Index1), .keep_all = TRUE) # only keep rows that have distinct values (disregarding Index1)
@@ -75,8 +60,7 @@ dat <- dat %>%
 # ------------------------------------------------------
 
 # convert categorical vars to factor
-fdat <- dat
-fdat$Number <- factor(dat$Number)
+dat$Number <- factor(dat$Number)
 
 labels <- list(
   GENDER = c("male", "female"),
@@ -92,17 +76,38 @@ labels <- list(
 
 for (var_name in names(labels)) {
   # convert to factor and assign correct labels
-  fdat[[var_name]] <- factor(fdat[[var_name]], labels = labels[[var_name]])
+  dat[[var_name]] <- factor(dat[[var_name]], labels = labels[[var_name]])
   # keep useful metadata
-  attr(fdat[[var_name]], "label") <- attr(dat_raw[[var_name]],"label") 
+  attr(dat[[var_name]], "label") <- attr(dat_raw[[var_name]],"label") 
 }
 
 # get variable names
-vars <- colnames(fdat)
+vars <- colnames(dat)
 allvars <- vars[2:length(vars)] # all variables except patient number
 catvars <- names(labels) # all categorical variables
 catvars <- catvars[catvars %in% allvars] # cat vars in current feature set
 numvars <- setdiff(allvars, catvars) # only numerical variables
+
+
+
+# ------------------------------------------------------
+# Inclusion criteria
+# ------------------------------------------------------
+
+# number of measurements per patient
+nm_per_pat <- dat %>%
+  group_by(Number) %>%
+  summarise(nm = n())
+nm_per_pat %>%
+  summarise(across(nm, list(median = median, sd = sd, min = min, max = max), .names = "nm-{fn}"))
+
+# count
+nPatients_drop <- sum(nm_per_pat$nm < 2)
+cat("# Patients with less than 2 obs.:", nPatients_drop, "\n")
+
+# drop patients with less than 2 obs / keep patients with more than 1 obs
+dat <- dat %>%
+  filter(Number %in% nm_per_pat$Number[nm_per_pat$nm > 1])
 
 # ------------------------------------------------------------------------------------------------------------------------ #
 #                                                       Data exploration                                                   #
@@ -113,14 +118,14 @@ numvars <- setdiff(allvars, catvars) # only numerical variables
 # # ------------------------------------------------------
 # 
 # # check for NA's
-# colSums(is.na(fdat))
+# colSums(is.na(dat))
 # 
 # # ------------------------------------------------------
 # # Univariate analysis
 # # ------------------------------------------------------
 # 
 # # numerical variables only
-# dat_norm <- fdat %>%
+# dat_norm <- dat %>%
 #   select(all_of(numvars)) %>%
 #   na.omit()
 # 
@@ -148,7 +153,7 @@ numvars <- setdiff(allvars, catvars) # only numerical variables
 #        y = "")
 # 
 # # Convert the data from wide to long format
-# dat_long_cat <- fdat %>%
+# dat_long_cat <- dat %>%
 #   pivot_longer(cols = all_of(catvars), names_to = "variable", values_to = "value", names_prefix = "cat_") %>%
 #   select(Number, variable, value)
 # 
@@ -163,36 +168,36 @@ numvars <- setdiff(allvars, catvars) # only numerical variables
 #   facet_wrap(~variable, scales = "free")
 # 
 # # create jittered box plots for all numvars
-# plots <- box.plot.jitter(fdat, ID = "Number", vars = numvars)
+# plots <- box.plot.jitter(dat, ID = "Number", vars = numvars)
 # 
 # # plot boxplots in grid
 # grid.arrange(grobs = plots, ncol = 3)
 # 
 # # get mean and sd for numvars
-# fdat %>%
+# dat %>%
 #   summarise(across(all_of(numvars), list(mean = mean, sd = sd, min = min, max = max), .names = "{col}-{fn}")) %>%
 #   pivot_longer(cols = everything(), # pivot to long format and rename cols/rows
 #                names_to = c(".value", "stat"),
 #                names_sep = "-")
 # 
-# plot distribution of days
-Tout <- 180 # median outcome is measured at 186 days...
-sdout <- 14 # ... with standard deviation 13 days
-Tbase <- 11 # median baseline is measured at 11 days
-T6w <- 42
-T3m <- 91
-
-ggplot(fdat, aes(x = Days)) +
-  geom_histogram(binwidth = 7) +
-  geom_vline(xintercept = Tout-sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
-  geom_vline(xintercept = Tout, color = "#440154", linetype = "dashed", linewidth = 1) +
-  geom_vline(xintercept = Tout+sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
-  geom_vline(xintercept = Tbase, color = "black", linetype = "dashed", linewidth = 1) +
-  geom_vline(xintercept = T6w, color = "black", linetype = "dashed", linewidth = 1) +
-  geom_vline(xintercept = T3m, color = "black", linetype = "dashed", linewidth = 1) +
-  labs(x = "Days", y = "Frequency") +
-  fancy
-
+# # plot distribution of days
+# Tout <- 180 # median outcome is measured at 186 days...
+# sdout <- 14 # ... with standard deviation 13 days
+# Tbase <- 11 # median baseline is measured at 11 days
+# T6w <- 42
+# T3m <- 91
+# 
+# ggplot(dat, aes(x = Days)) +
+#   geom_histogram(binwidth = 7) +
+#   geom_vline(xintercept = Tout-sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
+#   geom_vline(xintercept = Tout, color = "#440154", linetype = "dashed", linewidth = 1) +
+#   geom_vline(xintercept = Tout+sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
+#   geom_vline(xintercept = Tbase, color = "black", linetype = "dashed", linewidth = 1) +
+#   geom_vline(xintercept = T6w, color = "black", linetype = "dashed", linewidth = 1) +
+#   geom_vline(xintercept = T3m, color = "black", linetype = "dashed", linewidth = 1) +
+#   labs(x = "Days", y = "Frequency") +
+#   fancy
+# 
 # # ------------------------------------------------------
 # # Multivariate analysis
 # # ------------------------------------------------------
@@ -204,7 +209,7 @@ ggplot(fdat, aes(x = Days)) +
 # set.seed(seed)
 # corr_all <-  rmcorr_mat(participant = Number,
 #                         variables = numvars,
-#                         dataset = fdat,
+#                         dataset = dat,
 #                         CI.level = 0.95)
 # corrplot(corr_all$matrix,type = 'upper',tl.cex = 0.45, method='number',number.cex=0.5)
 
@@ -218,16 +223,16 @@ ggplot(fdat, aes(x = Days)) +
 
 # Create dummy vars model
 formula <- as.formula(paste("~ ", paste(catvars, collapse = " + "))) # formula for the vars to OHE
-dummies_model <- dummyVars(formula, data=fdat) # exclude patient ID
+dummies_model <- dummyVars(formula, data=dat) # exclude patient ID
 
 # Apply dummy vars model to data
-dat_ohe <- data.frame(predict(dummies_model, newdata = fdat))
+dat_ohe <- data.frame(predict(dummies_model, newdata = dat))
 
 # get colnames of dummyvars
 dummynames <- colnames(dat_ohe)
 
 # bind encoded vars back to main modelling data
-dat_mod <- cbind(fdat,dat_ohe) 
+dat_mod <- cbind(dat,dat_ohe) 
 
 # ------------------------------------------------------
 # Feature selection
@@ -763,7 +768,7 @@ lc_dat_mm[[3]] + fancy
 # patients included in analysis
 ids <- dat_mod_xgb$Number
 
-tabone <- fdat %>% 
+tabone <-dat %>% 
   #filter(Number %in% ids) %>% 
   #filter(Days <= 3) %>% 
   group_by(Number) %>% 
