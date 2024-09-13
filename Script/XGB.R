@@ -178,12 +178,12 @@ dat <- dat %>%
 #                names_to = c(".value", "stat"),
 #                names_sep = "-")
 # 
-# # plot distribution of days
-# Tout <- 180 # median outcome is measured at 186 days...
-# sdout <- 14 # ... with standard deviation 13 days
-# Tbase <- 11 # median baseline is measured at 11 days
-# T6w <- 42
-# T3m <- 91
+# plot distribution of days
+Tout <- 180 # median outcome is measured at 186 days...
+sdout <- 14 # ... with standard deviation 13 days
+Tbase <- 11 # median baseline is measured at 11 days
+T6w <- 42
+T3m <- 91
 # 
 # ggplot(dat, aes(x = Days)) +
 #   geom_histogram(binwidth = 7) +
