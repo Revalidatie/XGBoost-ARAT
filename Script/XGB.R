@@ -628,7 +628,7 @@ ggplot(plot_week, aes(y = AE_xgb)) +
 # per group & per week performance combined
 sample_size4 <- aggregate(AE ~ ARAT_base + time, perf_wks_xgb, length) %>% rename(count = AE)
 labels <- c(L = "Baseline ARAT 0-22",
-            M = "Baseline ARAT 23-47",
+            M = "Baseline ARAT 22-47",
             H = "Baseline ARAT 48-57")
 perf_wks_mm <- perf_wks_mm %>% mutate(mod = "MM")
 perf_wks_xgb <- perf_wks_xgb %>% mutate(mod = "XGB")

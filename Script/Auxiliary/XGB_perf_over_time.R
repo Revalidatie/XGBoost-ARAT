@@ -68,3 +68,5 @@ for(i in 1:length(weeks)){
 perf_wks_xgb$time <- factor(perf_wks_xgb$time, levels = names)
 
 #save(perf_wks_xgb,file = "Data/perf_over_wks_xgb.Rdata")
+
+# note: AE for week 13 and week 6 are similar or even the same in the medium and high baseline groups. This is because the patients in those groups didn't have any more recent measurements than 6 weeks. 
