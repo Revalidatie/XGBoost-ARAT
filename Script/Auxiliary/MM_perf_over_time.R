@@ -1,4 +1,6 @@
-# First run XGB.R until definition of M0 (Selles Mixed Model)
+# First run main.R until definition of Selles et al. Mixed Model (M_mm)
+# this scripts store prediction performance of the selles mixed model applied at 
+# different times post-stroke
 
 weeks <- c(1, 6, 13)
 names <- c("Week 1", "Week 6", "Week 13")

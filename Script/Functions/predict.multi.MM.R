@@ -14,7 +14,7 @@ predict.multi.MM <- function (M, new_dat, pred_time = 180, alpha = 0.20){
   # pred_time <- 180
   # alpha <- 0.2
 
-  source('Script/Functions/Selles_MM.R') # custom function(s) for running Selles mixed models
+  source('Script/Functions/Selles.MM.R') # custom function(s) for running Selles mixed models
   
   # store patient IDs in test data
   iPatients <- unique(new_dat$Number) # unique patients in test set
