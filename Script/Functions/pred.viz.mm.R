@@ -51,7 +51,7 @@ pred.viz.mm <- function (cur_pat){
   # plot recovery profile
   p <- ggplot() +
         geom_line(data = filter(Indv_pred_mm, type == "pred"), aes(x = Days, y = pred)) +
-        geom_point(data = filter(Indv_pred_mm, type == "obs"), aes(x = Days, y = ARAT), , col = "#440154", size = 2) +
+        geom_point(data = filter(Indv_pred_mm, type == "obs"), aes(x = Days, y = ARAT), , col = "#404688", size = 2) +
         geom_ribbon(data = filter(Indv_pred_mm, type == "pred"), aes(x = Days, y = pred, ymin = low, ymax = upp), fill = "#21918c", alpha = 0.05)
   
   # plot error bar

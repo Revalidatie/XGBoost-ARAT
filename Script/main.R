@@ -17,8 +17,8 @@
 # ------------------------------------------------------------------------------------------------------------------------ #
 
 # custom functions
-source('Script/Auxiliary/setup.R') # general setup
-source('Script/Functions/box.plot.jitter.R') # jittered box plots
+source('Script/setup.R') # general setup
+source('Script/Functions/box.plot.jitter.R') # create jittered boxplots
 source('Script/Functions/my.rep.folds.R') # create patient-wise repeated folds for CV
 source('Script/Functions/Selles.MM.R') # running Selles mixed models
 source('Script/Functions/predict.multi.MM.R') # running Selles MM for multiple patients
@@ -114,105 +114,105 @@ dat <- dat %>%
 #                                                       Data exploration                                                   #
 # ------------------------------------------------------------------------------------------------------------------------ #
 
-# # ------------------------------------------------------
-# # Missing data analysis
-# # ------------------------------------------------------
-# 
-# # check for NA's
-# colSums(is.na(dat))
-# 
-# # ------------------------------------------------------
-# # Univariate analysis
-# # ------------------------------------------------------
-# 
-# # numerical variables only
-# dat_norm <- dat %>%
-#   select(all_of(numvars)) %>%
-#   na.omit()
-# 
-# # apply shapiro test to columns and immediately extract p value
-# set.seed(seed)
-# shap_p <- apply(dat_norm, 2, function(x) shapiro.test(x)$p.value)
-# 
-# # create data frame for plotting with p value as character
-# shap_lab <- data.frame(
-#   label = paste0("p = ",as.character(shap_p)),
-#   Variable  = numvars
-# )
-# 
-# dat_norm %>%
-#   gather(key = Variable, value = Value) %>%
-#   ggplot(aes(x=Value)) + geom_density(fill="lightgrey") + fancy +
-#   facet_wrap(~Variable,ncol=3,scales="free") +
-#   geom_text(
-#     data    = shap_lab,
-#     mapping = aes(x = Inf, y = -Inf, label = label),
-#     hjust = 1.2,
-#     vjust = -3,
-#   ) +
-#   labs(x = "",
-#        y = "")
-# 
-# # Convert the data from wide to long format
-# dat_long_cat <- dat %>%
-#   pivot_longer(cols = all_of(catvars), names_to = "variable", values_to = "value", names_prefix = "cat_") %>%
-#   select(Number, variable, value)
-# 
-# # Create separate bar plots for each categorical variable
-# ggplot(dat_long_cat, aes(x = value)) +
-#   geom_bar() +
-#   labs(
-#     x = "Category",
-#     y = "Count"
-#   ) +
-#   fancy_multi +
-#   facet_wrap(~variable, scales = "free")
-# 
-# # create jittered box plots for all numvars
-# plots <- box.plot.jitter(dat, ID = "Number", vars = numvars)
-# 
-# # plot boxplots in grid
-# grid.arrange(grobs = plots, ncol = 3)
-# 
-# # get mean and sd for numvars
-# dat %>%
-#   summarise(across(all_of(numvars), list(mean = mean, sd = sd, min = min, max = max), .names = "{col}-{fn}")) %>%
-#   pivot_longer(cols = everything(), # pivot to long format and rename cols/rows
-#                names_to = c(".value", "stat"),
-#                names_sep = "-")
-# 
+# ------------------------------------------------------
+# Missing data analysis
+# ------------------------------------------------------
+
+# check for NA's
+colSums(is.na(dat))
+
+# ------------------------------------------------------
+# Univariate analysis
+# ------------------------------------------------------
+
+# numerical variables only
+dat_norm <- dat %>%
+  select(all_of(numvars)) %>%
+  na.omit()
+
+# apply shapiro test to columns and immediately extract p value
+set.seed(seed)
+shap_p <- apply(dat_norm, 2, function(x) shapiro.test(x)$p.value)
+
+# create data frame for plotting with p value as character
+shap_lab <- data.frame(
+  label = paste0("p = ",as.character(shap_p)),
+  Variable  = numvars
+)
+
+dat_norm %>%
+  gather(key = Variable, value = Value) %>%
+  ggplot(aes(x=Value)) + geom_density(fill="lightgrey") + fancy +
+  facet_wrap(~Variable,ncol=3,scales="free") +
+  geom_text(
+    data    = shap_lab,
+    mapping = aes(x = Inf, y = -Inf, label = label),
+    hjust = 1.2,
+    vjust = -3,
+  ) +
+  labs(x = "",
+       y = "")
+
+# Convert the data from wide to long format
+dat_long_cat <- dat %>%
+  pivot_longer(cols = all_of(catvars), names_to = "variable", values_to = "value", names_prefix = "cat_") %>%
+  select(Number, variable, value)
+
+# Create separate bar plots for each categorical variable
+ggplot(dat_long_cat, aes(x = value)) +
+  geom_bar() +
+  labs(
+    x = "Category",
+    y = "Count"
+  ) +
+  fancy_multi +
+  facet_wrap(~variable, scales = "free")
+
+# create jittered box plots for all numvars
+plots <- box.plot.jitter(dat, ID = "Number", vars = numvars)
+
+# plot boxplots in grid
+grid.arrange(grobs = plots, ncol = 3)
+
+# get mean and sd for numvars
+dat %>%
+  summarise(across(all_of(numvars), list(mean = mean, sd = sd, min = min, max = max), .names = "{col}-{fn}")) %>%
+  pivot_longer(cols = everything(), # pivot to long format and rename cols/rows
+               names_to = c(".value", "stat"),
+               names_sep = "-")
+
 # plot distribution of days
 Tout <- 180 # median outcome is measured at 186 days...
 sdout <- 14 # ... with standard deviation 13 days
 Tbase <- 11 # median baseline is measured at 11 days
 T6w <- 42
 T3m <- 91
-# 
-# ggplot(dat, aes(x = Days)) +
-#   geom_histogram(binwidth = 7) +
-#   geom_vline(xintercept = Tout-sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
-#   geom_vline(xintercept = Tout, color = "#440154", linetype = "dashed", linewidth = 1) +
-#   geom_vline(xintercept = Tout+sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
-#   geom_vline(xintercept = Tbase, color = "black", linetype = "dashed", linewidth = 1) +
-#   geom_vline(xintercept = T6w, color = "black", linetype = "dashed", linewidth = 1) +
-#   geom_vline(xintercept = T3m, color = "black", linetype = "dashed", linewidth = 1) +
-#   labs(x = "Days", y = "Frequency") +
-#   fancy
-# 
-# # ------------------------------------------------------
-# # Multivariate analysis
-# # ------------------------------------------------------
-# 
-# # multicollinearity
-# 
-# # correlation matrix
-# # repeated measures correlation matrix
-# set.seed(seed)
-# corr_all <-  rmcorr_mat(participant = Number,
-#                         variables = numvars,
-#                         dataset = dat,
-#                         CI.level = 0.95)
-# corrplot(corr_all$matrix,type = 'upper',tl.cex = 0.45, method='number',number.cex=0.5)
+
+ggplot(dat, aes(x = Days)) +
+  geom_histogram(binwidth = 7) +
+  geom_vline(xintercept = Tout-sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
+  geom_vline(xintercept = Tout, color = "#440154", linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = Tout+sdout, color = "#3b528b", linetype = "dashed", linewidth = .5) +
+  geom_vline(xintercept = Tbase, color = "black", linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = T6w, color = "black", linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = T3m, color = "black", linetype = "dashed", linewidth = 1) +
+  labs(x = "Days", y = "Frequency") +
+  fancy
+
+# ------------------------------------------------------
+# Multivariate analysis
+# ------------------------------------------------------
+
+# multicollinearity
+
+# correlation matrix
+# repeated measures correlation matrix
+set.seed(seed)
+corr_all <-  rmcorr_mat(participant = Number,
+                        variables = numvars,
+                        dataset = dat,
+                        CI.level = 0.95)
+corrplot(corr_all$matrix,type = 'upper',tl.cex = 0.45, method='number',number.cex=0.5)
 
 # ------------------------------------------------------------------------------------------------------------------------ #
 #                                                     Feature engineering                                                  #
@@ -542,6 +542,14 @@ for (id in highlight_patients) {
 plot + theme(legend.position = "none") + scale_color_viridis_d()
 
 # FIGURE 3: panel plot, comparing two typical patients
+dat_plot <- dat_mod %>%
+  filter(Number %in% eval_xgb$Number) %>% 
+  group_by(Number) %>% 
+  filter(Days <= applied_at) %>% # model applied at
+  select(Number, SA, FE, ARAT, Days) %>% 
+  ungroup()
+plot_pats <- unique(dat_plot$Number)
+
 plot_list_xgb1 <- setNames(lapply(plot_pats, pred.vizB),plot_pats)
 plot_list_mm1 <- setNames(lapply(plot_pats, pred.viz.mm),plot_pats)
 
@@ -549,6 +557,8 @@ pA1xgb <- plot_list_xgb1[["257"]] + labs(x="")
 pA1mm <- plot_list_mm1[["257"]] + labs(x="", y="")
 pB1xgb <- plot_list_xgb1[["403"]] + labs(x="", y="")
 pB1mm <- plot_list_mm1[["403"]] + labs(x="", y="")
+  # at this point, rerun models (lines ~400-500) again, but change variable
+  # "applied_at"
 pA2xgb <- plot_list_xgb1[["257"]]
 pA2mm <- plot_list_mm1[["257"]] + labs(x="", y="")
 pB2xgb <- plot_list_xgb1[["403"]] + labs(x="", y="")
