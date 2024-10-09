@@ -1,4 +1,4 @@
-Copyright (c) [2024] [Ruisheng Su]
+Copyright (c) [2024] [ICAI STROKE LAB]
 
 =======================================
 “Commons Clause” License Condition v1.0
